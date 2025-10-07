@@ -1,9 +1,9 @@
 import { MoonIcon, SunIcon } from "lucide-react";
-import { Button, type ButtonProps } from "./ui/button";
 import { useTheme } from "./theme-provider";
+import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
-export function ThemeToggler({ className }: ButtonProps) {
+export function ThemeToggler({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
 
   const switchTheme = () => {

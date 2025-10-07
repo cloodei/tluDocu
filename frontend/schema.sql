@@ -1,0 +1,53 @@
+-- POSTGRESQL 18
+
+CREATE TABLE skill (
+    skill_id SERIAL PRIMARY KEY,
+    skill_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE department (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(255) NOT NULL,
+);
+
+CREATE TABLE teacher (
+    teacher_id VARCHAR(50) PRIMARY KEY,
+    teacher_name VARCHAR(255) NOT NULL,
+    teacher_email VARCHAR(255) UNIQUE,
+    department_id INT REFERENCES department(department_id)
+);
+
+CREATE TABLE subject (
+    subject_id INT PRIMARY KEY,
+    subject_name VARCHAR(255) NOT NULL,
+    subject_code VARCHAR(50),
+    department_id INT REFERENCES department(department_id)
+);
+
+CREATE TABLE course (
+    course_id INT PRIMARY KEY,
+    course_year VARCHAR(50) NOT NULL,
+    semester_name VARCHAR(50) NOT NULL,
+    register_period VARCHAR(100),
+    subject_id INT REFERENCES subject(subject_id),
+    department_id INT REFERENCES department(department_id),
+    teacher_id VARCHAR(50) REFERENCES teacher(teacher_id),
+    course_name VARCHAR(255) NOT NULL,
+    number_of_credit INT,
+    numberStudent INT,
+    credit INT,
+    unit INT,
+    quantity INT,
+    coef NUMERIC(5,2),
+    num_out_hours INT,
+    coef_cttt NUMERIC(5,2),
+    coef_far NUMERIC(5,2),
+    standard_hours NUMERIC(6,2),
+    flag BOOLEAN,
+    note TEXT
+);
+
+ALTER TABLE department
+ADD CONSTRAINT fk_department_head
+FOREIGN KEY (head_id)
+REFERENCES teacher(teacher_id);
