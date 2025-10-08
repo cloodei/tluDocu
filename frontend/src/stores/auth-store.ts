@@ -12,11 +12,13 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
 
-  login: (user: User, token: string) => void;
-  logout: () => void;
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
-  setIsAuthenticated: (isAuthenticated: boolean) => void;
+  actions: {
+    login: (user: User, token: string) => void;
+    logout: () => void;
+    setUser: (user: User | null) => void;
+    setToken: (token: string | null) => void;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
+  };
 }
 
 const useAuthStore = create<AuthState>()(
@@ -27,25 +29,31 @@ const useAuthStore = create<AuthState>()(
         token: null,
         isAuthenticated: false,
 
-        setUser: (user) => set({ user, isAuthenticated: !!user }),
-        setToken: (token) => set({ token }),
-        setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
-
-        login: (user, token) => {
-          set({
-            user,
-            token,
-            isAuthenticated: true
-          });
+        actions: {
+          login: (user, token) => {
+            set({
+              user,
+              token,
+              isAuthenticated: true
+            });
+          },
+          logout: () => {
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false
+            });
+          },
+          setUser: (user) => {
+            set({ user, isAuthenticated: !!user });
+          },
+          setToken: (token) => {
+            set({ token });
+          },
+          setIsAuthenticated: (isAuthenticated) => {
+            set({ isAuthenticated });
+          },
         },
-
-        logout: () => {
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false
-          });
-        }
       }),
       {
         name: 'auth-storage',
@@ -63,12 +71,7 @@ const useAuthStore = create<AuthState>()(
 const useUser = () => useAuthStore((state) => state.user);
 const useAuthToken = () => useAuthStore((state) => state.token);
 const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
-const useAuthActions = () => useAuthStore((state) => ({
-  login: state.login,
-  logout: state.logout,
-  setUser: state.setUser,
-  setToken: state.setToken,
-  setIsAuthenticated: state.setIsAuthenticated
-}));
+
+const useAuthActions = () => useAuthStore((state) => state.actions);
 
 export { useUser, useAuthToken, useIsAuthenticated, useAuthActions };

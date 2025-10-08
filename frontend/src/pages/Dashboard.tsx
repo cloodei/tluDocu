@@ -1,22 +1,21 @@
 import { useNavigate } from 'react-router';
-import { useUser, useAuthActions } from '../stores/auth-store';
-import { logoutUser } from '../lib/auth';
 import { Button } from '@/components/ui/button';
+import { logoutUser } from '@/lib/auth';
+import { useUser, useAuthActions } from '@/stores/auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = useUser();
-  const authActions = useAuthActions();
+  const { logout } = useAuthActions();
 
   const handleLogout = () => {
-    logoutUser(authActions);
+    logoutUser({ logout });
     navigate('/login');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -51,7 +50,6 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

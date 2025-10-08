@@ -1,10 +1,10 @@
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { Navigate, useNavigate } from 'react-router';
-import { loginUser } from '@/lib/auth';
-import { useIsAuthenticated, useAuthActions } from '@/stores/auth-store';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { loginUser } from '@/lib/auth';
+import { useIsAuthenticated, useAuthActions } from '@/stores/auth-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LoginFormData {
@@ -16,6 +16,8 @@ export default function Login() {
   const navigate = useNavigate();
   const isAuthenticated = useIsAuthenticated();
   const { login } = useAuthActions();
+
+  console.log(isAuthenticated);
   
   const {
     register,
