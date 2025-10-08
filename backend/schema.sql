@@ -8,14 +8,14 @@ CREATE TABLE skill (
 CREATE TABLE department (
     department_id INT PRIMARY KEY,
     department_name VARCHAR(255) NOT NULL,
-	  head_id VARCHAR(50)
+    head_id VARCHAR(50)
 );
 
 CREATE TABLE teacher (
     teacher_id VARCHAR(50) PRIMARY KEY,
     teacher_name VARCHAR(255) NOT NULL,
     teacher_email VARCHAR(255) UNIQUE,
-    teacher_password VARCHAR(255) NOT NULL,
+    teacher_password VARCHAR(255),
     department_id INT REFERENCES department(department_id)
 );
 

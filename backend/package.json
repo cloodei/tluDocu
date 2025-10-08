@@ -1,11 +1,14 @@
 {
   "name": "backend",
-  "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/jwt": "^1.4.0",
+    "@elysiajs/openapi": "^1.4.11",
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "elysia": "latest"
@@ -13,6 +16,5 @@
   "devDependencies": {
     "bun-types": "latest",
     "drizzle-kit": "^0.31.5"
-  },
-  "module": "src/index.js"
+  }
 }
