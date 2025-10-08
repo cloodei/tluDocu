@@ -1,5 +1,8 @@
 {
   "name": "tludocu",
   "scripts": {
+    "install": "bun frontend:install && bun backend:install",
+    "frontend:install": "cd frontend && bun install",
+    "backend:install": "cd backend && bun install"
   }
 }

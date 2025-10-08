@@ -8,6 +8,7 @@ CREATE TABLE skill (
 CREATE TABLE department (
     department_id INT PRIMARY KEY,
     department_name VARCHAR(255) NOT NULL,
+	  head_id VARCHAR(50)
 );
 
 CREATE TABLE teacher (
@@ -34,7 +35,9 @@ CREATE TABLE course (
     teacher_id VARCHAR(50) REFERENCES teacher(teacher_id),
     course_name VARCHAR(255) NOT NULL,
     number_of_credit INT,
-    numberStudent INT,
+    numberstudent INT,
+    num_group INT,
+    skill_id INT REFERENCES skill(skill_id),
     credit INT,
     unit INT,
     quantity INT,
@@ -43,7 +46,7 @@ CREATE TABLE course (
     coef_cttt NUMERIC(5,2),
     coef_far NUMERIC(5,2),
     standard_hours NUMERIC(6,2),
-    flag BOOLEAN,
+    flag INT,
     note TEXT
 );
 
