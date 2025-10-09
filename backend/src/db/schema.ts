@@ -1,4 +1,4 @@
-import { pgTable, varchar, integer, numeric, text, AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, integer, numeric, text, AnyPgColumn, timestamp, serial } from 'drizzle-orm/pg-core';
 
 export const skillTable = pgTable('skill', {
   skill_id: integer().primaryKey(),
@@ -49,4 +49,14 @@ export const courseTable = pgTable('course', {
   standard_hours: numeric({ precision: 6, scale: 2 }),
   flag: integer(),
   note: text()
+});
+
+export const requestTable = pgTable('requests', {
+  request_id: serial().primaryKey(),
+  teacher_id: varchar({ length: 50 }).references(() => teacherTable.teacher_id),
+  course_id: integer().references(() => courseTable.course_id),
+  number_student: integer("numberstudent").notNull(),
+  quantity: integer().notNull(),
+  created_at: timestamp({ withTimezone: true }).defaultNow(),
+  updated_at: timestamp({ withTimezone: true }).defaultNow(),
 });

@@ -51,6 +51,31 @@ CREATE TABLE course (
     note TEXT
 );
 
+CREATE TABLE requests (
+    request_id SERIAL PRIMARY KEY,
+    teacher_id VARCHAR(50) NOT NULL REFERENCES teacher(teacher_id) ON DELETE CASCADE,
+    course_id INTEGER NOT NULL REFERENCES course(course_id) ON DELETE CASCADE,
+    numberstudent INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (ROW(NEW.*) IS DISTINCT FROM ROW(OLD.*)) THEN
+        NEW.updated_at := CURRENT_TIMESTAMP;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON requests
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
 ALTER TABLE department
 ADD CONSTRAINT fk_department_head
 FOREIGN KEY (head_id)

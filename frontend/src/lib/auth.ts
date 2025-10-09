@@ -45,6 +45,6 @@ export async function loginUser({
   login(user, data.token);
 }
 
-export function logoutUser(authActions: { logout: () => void }) {
-  authActions.logout();
+export function logoutUser(logout: () => void) {
+  logout();
 }

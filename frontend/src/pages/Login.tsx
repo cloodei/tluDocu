@@ -45,13 +45,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-200/20 dark:bg-indigo-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Card className="w-full max-w-md relative z-10 shadow-2xl border-2">
+      <Card className="w-full max-w-md relative z-10 shadow-md border-2">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center mb-2">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-1 shadow-lg">
@@ -148,7 +148,7 @@ export default function Login() {
 
           <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
             <p>© 2025 Đại học Thủy lợi</p>
-            <p className="mt-1">Hệ thống quản lý tài liệu</p>
+            <p className="mt-1">Quản lý đào tạo</p>
           </div>
         </CardContent>
       </Card>

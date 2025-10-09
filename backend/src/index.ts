@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia, t } from "elysia";
 import { jwt, JWTPayloadSpec } from "@elysiajs/jwt";
 import { db } from "./db/db";
-import { courseTable, departmentTable, skillTable, subjectTable, teacherTable } from "./db/schema";
+import { courseTable, departmentTable, requestTable, skillTable, subjectTable, teacherTable } from "./db/schema";
 
 type Role = "admin" | "head" | "teacher";
 
@@ -122,6 +122,7 @@ const app = new Elysia()
       return status(401, { message: "Unauthorized" });
 
     const sel = {
+      course_id: courseTable.course_id,
       course_year: courseTable.course_year,
       semester_name: courseTable.semester_name,
       register_period: courseTable.register_period,
@@ -174,6 +175,16 @@ const app = new Elysia()
     if (user.role === "teacher")
       return status(403, { message: "Forbidden" });
 
+    if (user.role === "admin")
+      return await db
+        .select({
+          id: teacherTable.teacher_id,
+          name: teacherTable.teacher_name,
+          email: teacherTable.teacher_email,
+          department_id: teacherTable.department_id
+        })
+        .from(teacherTable);
+
     return await db
       .select({
         id: teacherTable.teacher_id,
@@ -181,8 +192,96 @@ const app = new Elysia()
         email: teacherTable.teacher_email,
         department_id: teacherTable.department_id
       })
-      .from(teacherTable);
+      .from(teacherTable)
+      .where(eq(teacherTable.department_id, user.departmentId!));
   })
+
+  .post("/api/courses/:courseId/requests", async ({ params, body, user, status }) => {
+    if (!user)
+      return status(401, { message: "Unauthorized" });
+
+    if (user.role !== "head" && user.role !== "admin")
+      return status(403, { message: "Forbidden" });
+
+    const courseId = Number(params.courseId);
+    if (!Number.isFinite(courseId))
+      return status(400, { message: "Invalid course" });
+
+    const [course] = await db
+      .select({
+        departmentId: courseTable.department_id,
+      })
+      .from(courseTable)
+      .where(eq(courseTable.course_id, courseId))
+
+    if (!course)
+      return status(404, { message: "Course not found" });
+
+    if (user.role === "head" && course.departmentId !== user.departmentId)
+      return status(403, { message: "Forbidden" });
+
+    const values = body.requests.map((request) => ({
+      teacher_id: request.teacherId,
+      course_id: courseId,
+      number_student: request.numberStudent,
+      quantity: request.quantity,
+    }));
+
+    if (values.length === 0)
+      return status(400, { message: "Empty request" });
+
+    await db.insert(requestTable).values(values);
+
+    return { success: true };
+  }, {
+    params: t.Object({
+      courseId: t.String(),
+    }),
+    body: t.Object({
+      requests: t.Array(t.Object({
+        teacherId: t.String(),
+        numberStudent: t.Integer({ minimum: 0 }),
+        quantity: t.Integer({ minimum: 0 }),
+      }), { minItems: 1 }),
+    }),
+  })
+  .get("/api/courses/:courseId/requests", async ({ params, user, status }) => {
+    if (!user)
+      return status(401, { message: "Unauthorized" });
+
+    if (user.role !== "head" && user.role !== "admin")
+      return status(403, { message: "Forbidden" });
+
+    const courseId = Number(params.courseId);
+    if (!Number.isFinite(courseId))
+      return status(400, { message: "Invalid course" });
+
+    const [course] = await db
+      .select({ departmentId: courseTable.department_id })
+      .from(courseTable)
+      .where(eq(courseTable.course_id, courseId))
+
+    if (!course)
+      return status(404, { message: "Course not found" });
+
+    if (user.role === "head" && course.departmentId !== user.departmentId)
+      return status(403, { message: "Forbidden" });
+
+    return await db
+      .select({
+        requestId: requestTable.request_id,
+        teacherId: requestTable.teacher_id,
+        teacherName: teacherTable.teacher_name,
+        numberStudent: requestTable.number_student,
+        quantity: requestTable.quantity,
+        createdAt: requestTable.created_at,
+      })
+      .from(requestTable)
+      .leftJoin(teacherTable, eq(requestTable.teacher_id, teacherTable.teacher_id))
+      .where(eq(requestTable.course_id, courseId))
+      .orderBy(asc(requestTable.created_at));
+  })
+
   .get("/api/dashboard/graduate", async () => {
     
   })
