@@ -16,8 +16,6 @@ export default function Login() {
   const navigate = useNavigate();
   const isAuthenticated = useIsAuthenticated();
   const { login } = useAuthActions();
-
-  console.log(isAuthenticated);
   
   const {
     register,
@@ -37,12 +35,12 @@ export default function Login() {
   const onSubmit = async ({ email, password }: LoginFormData) => {
     try {
       await loginUser({ email, password, login });
-      toast.success('Chào mừng bạn quay lại!');
+      toast.success('Đăng nhập thành công!');
       navigate('/dashboard');
     }
-    catch (error) {
-      toast.error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
-      console.error('Login error:', error);
+    catch (error: any) {
+      toast.error('Đăng nhập thất bại: ' + error.message);
+      console.error('Login error:', error.message);
     }
   };
 

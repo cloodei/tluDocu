@@ -1,49 +1,78 @@
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useState } from 'react';
+import type { Role } from '@/lib/types';
+import { fetchCourses, fetchTeachers } from '@/lib/api';
+import { useUser, useAuthActions, useAuthToken } from '@/stores/auth-store';
 import { logoutUser } from '@/lib/auth';
-import { useUser, useAuthActions } from '@/stores/auth-store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { formatNumber } from '@/lib/utils';
+import { TeacherAssignmentDialog } from '@/components/assign-dialog';
+
+const roleLabels: Record<Role, string> = {
+  admin: 'Quản trị viên',
+  head: 'Trưởng khoa',
+  teacher: 'Giảng viên'
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = useUser();
+  const token = useAuthToken();
   const { logout } = useAuthActions();
+
+  const coursesQuery = useQuery({
+    queryKey: ['dashboard-courses', token],
+    queryFn: () => fetchCourses(token!),
+    enabled: Boolean(token),
+    retry: 1
+  });
+
+  const teachersQuery = useQuery({
+    queryKey: ['teacher-options', token],
+    queryFn: () => fetchTeachers(token!),
+    enabled: Boolean(token) && user?.role === 'head',
+    retry: 1
+  });
 
   const handleLogout = () => {
     logoutUser({ logout });
     navigate('/login');
   };
 
+  const roleLabel = user ? roleLabels[user.role] : '';
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-neutral-100 border-b border-slate-200 shadow-xs">
+        <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center overflow-hidden">
-              <img 
-                src="/tlu-logo.png" 
-                alt="Logo Đại học Thủy lợi" 
-                className="w-8 h-8 object-contain"
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center overflow-hidden shadow-md">
+              <img
+                src="/tlu-logo.png"
+                alt="Logo Đại học Thủy lợi"
+                className="w-10 h-10 object-contain"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                Tài liệu Đại học Thủy lợi
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Hệ thống quản lý tài liệu</p>
+              <h2 className="text-lg font-semibold text-slate-900">Hệ thống quản lý đào tạo</h2>
+              {roleLabel && (
+                <p className="text-sm text-slate-500">Vai trò: {roleLabel}</p>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+              <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
+              <p className="text-xs text-slate-500">{user?.email}</p>
             </div>
-            <Button 
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleLogout} variant="default" size="sm">
               Đăng xuất
             </Button>
           </div>
@@ -51,52 +80,86 @@ export default function Dashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Xin chào, {user?.name}!
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Quản lý tài liệu và cộng tác với nhóm của bạn.
-          </p>
-        </div>
+        <section className="bg-white border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-emerald-100">
+                  <TableHead className="font-semibold text-emerald-900">Học kỳ</TableHead>
+                  <TableHead className="font-semibold text-emerald-900">Giai đoạn</TableHead>
+                  <TableHead className="font-semibold text-emerald-900">Tên lớp</TableHead>
+                  <TableHead className="font-semibold text-emerald-900">Kỹ năng</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Sĩ số</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Số nhóm</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">ĐVT</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Số lượng</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Hệ số</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">CTTT</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Xa trường</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Ngoài giờ</TableHead>
+                  <TableHead className="font-semibold text-emerald-900 text-right">Số tiết quy đổi</TableHead>
+                  <TableHead className="font-semibold text-emerald-900">Ghi chú</TableHead>
+                  <TableHead className="font-semibold text-emerald-900">Giảng viên</TableHead>
+                  {user?.role === 'head' && <TableHead className="font-semibold text-emerald-900 text-center">Thao tác</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {coursesQuery.isLoading && (
+                  <TableRow>
+                    <TableCell colSpan={user?.role === 'head' ? 16 : 15} className="py-10 text-center text-slate-500">
+                      Đang tải dữ liệu...
+                    </TableCell>
+                  </TableRow>
+                )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tài liệu của tôi</CardTitle>
-              <CardDescription>Truy cập tài liệu cá nhân</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Chưa có tài liệu. Hãy bắt đầu bằng cách tạo tài liệu đầu tiên của bạn.
-              </p>
-            </CardContent>
-          </Card>
+                {coursesQuery.isError && (
+                  <TableRow>
+                    <TableCell colSpan={user?.role === 'head' ? 16 : 15} className="py-10 text-center text-red-600">
+                      Không thể tải dữ liệu. Vui lòng thử lại sau.
+                    </TableCell>
+                  </TableRow>
+                )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tài liệu được chia sẻ</CardTitle>
-              <CardDescription>Tài liệu được chia sẻ với bạn</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Hiện chưa có tài liệu được chia sẻ.
-              </p>
-            </CardContent>
-          </Card>
+                {!coursesQuery.isLoading && !coursesQuery.isError && coursesQuery.data && coursesQuery.data.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={user?.role === 'head' ? 16 : 15} className="py-10 text-center text-slate-500">
+                      Chưa có dữ liệu cho kỳ này.
+                    </TableCell>
+                  </TableRow>
+                )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Hoạt động gần đây</CardTitle>
-              <CardDescription>Các hoạt động mới nhất của bạn</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Không có hoạt động gần đây để hiển thị.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+                {coursesQuery.data?.map((course, index) => (
+                  <TableRow key={`${course.courseYear}-${course.courseName}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-emerald-50/40'}>
+                    <TableCell className="">{course.semesterName || '—'}</TableCell>
+                    <TableCell className="">{course.registerPeriod || '—'}</TableCell>
+                    <TableCell className="">{course.courseName || course.subjectName || '—'}</TableCell>
+                    <TableCell className="">{course.skillName || '—'}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.numberStudent)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.numberGroup)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.unit)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.quantity)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.coef)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.coefCttt)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.coefFar)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.numOutHours)}</TableCell>
+                    <TableCell className="text-right">{formatNumber(course.standardHours)}</TableCell>
+                    <TableCell className="">{course.note || '—'}</TableCell>
+                    <TableCell className="">{course.teacherName || 'Chưa phân công'}</TableCell>
+                    {user?.role === 'head' && (
+                      <TableCell className="text-center">
+                        <TeacherAssignmentDialog
+                          course={course}
+                          teachers={teachersQuery.data ?? []}
+                          isLoading={teachersQuery.isLoading}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
       </main>
     </div>
   );

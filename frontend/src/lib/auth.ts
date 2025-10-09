@@ -1,14 +1,13 @@
-import { apiUrl } from './api';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import { apiUrl } from "./api";
+import { type User } from "./types";
 
 interface LoginResponse {
-  user: User;
   token: string;
+  role: 'admin' | 'head' | 'teacher';
+  teacherId: string;
+  email: string;
+  teacherName?: string | null;
+  departmentId: number | null;
 }
 
 export async function loginUser({
@@ -20,31 +19,30 @@ export async function loginUser({
   password: string;
   login: (user: User, token: string) => void;
 }) {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`${apiUrl}/auth/login`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ email, password }),
-  // });
-  // 
-  // if (!response.ok) {
-  //   throw new Error('Đăng nhập thất bại');
-  // }
-  // 
-  // const data: LoginResponse = await response.json();
-  // authActions.login(data.user, data.token);
+  const response = await fetch(`${apiUrl}/api/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
 
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  const mockUser: User = {
-    id: '1',
+  if (response.status === 401)
+    throw new Error("Tài khoản không tồn tại");
+  if (response.status === 403)
+    throw new Error("Mật khẩu không chính xác");
+
+  const data: LoginResponse = await response.json();
+
+  const user: User = {
+    id: data.teacherId,
     email,
-    name: email.split('@')[0],
+    name: data.teacherName ?? email.split('@')[0],
+    role: data.role,
+    departmentId: data.departmentId
   };
-  
-  const mockToken = 'mock-jwt-token-' + Date.now();
-  
-  login(mockUser, mockToken);
+
+  login(user, data.token);
 }
 
 export function logoutUser(authActions: { logout: () => void }) {

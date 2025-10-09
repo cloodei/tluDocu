@@ -1,8 +1,8 @@
 import { Route, Routes, Navigate } from 'react-router';
 import { Toaster } from 'sonner';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 import './index.css';
 
 export default function App() {
@@ -18,10 +18,10 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        {/* Catch all other routes and redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-      <Toaster position="top-right" richColors />
+
+      <Toaster position="bottom-right" richColors />
     </>
   );
 }

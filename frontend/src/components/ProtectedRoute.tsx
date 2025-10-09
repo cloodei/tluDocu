@@ -1,9 +1,8 @@
-import type { ReactNode } from 'react';
 import { Navigate } from 'react-router';
-import { useIsAuthenticated } from '../stores/auth-store';
+import { useIsAuthenticated } from '@/stores/auth-store';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
