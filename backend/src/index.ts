@@ -1,9 +1,11 @@
 import { Elysia, t } from "elysia";
 import { db } from "./db/db";
-import { teacherTable } from "./db/schema";
+import { courseTable, teacherTable } from "./db/schema";
 import { eq } from "drizzle-orm";
+import { openapi } from "@elysiajs/openapi";
 
 const app = new Elysia()
+  .use(openapi())
   .get("/", () => "Hello Elysia")
   .post("/api/login", async ({ body }) => {
     
@@ -19,9 +21,14 @@ const app = new Elysia()
   })
   .get("/api/teachers/:id", async ({ params }) => {
     const [teacher] = await db
-      .select()
-      .from(teacherTable)
-      .where(eq(teacherTable.teacherId, params.id));
+      .select({
+        semesterName: courseTable.semesterName,
+        courseYear: courseTable.courseYear,
+        courseName: courseTable.courseName,
+        numberOfCredit: courseTable.numberOfCredit,
+      })
+      .from(courseTable)
+      .where(eq(courseTable.teacherId, params.id));
     return teacher;
   })
   .listen({ port: 3000, hostname: "0.0.0.0" });

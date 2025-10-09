@@ -55,3 +55,14 @@ ALTER TABLE department
 ADD CONSTRAINT fk_department_head
 FOREIGN KEY (head_id)
 REFERENCES teacher(teacher_id);
+
+CREATE TABLE requests (
+    request_id SERIAL PRIMARY KEY,
+    teacher_id VARCHAR(50) NOT NULL REFERENCES teacher(teacher_id) ON DELETE CASCADE,
+    course_id INTEGER NOT NULL REFERENCES course(course_id) ON DELETE CASCADE,
+    numberstudent INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
